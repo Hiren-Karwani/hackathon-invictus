@@ -1,11 +1,80 @@
-# Sample Snack app
+SR-31-Invictus
 
-Open the `App.js` file to start writing some code. You can preview the changes directly on your phone or tablet by scanning the **QR code** or use the iOS or Android emulators. When you're done, click **Save** and share the link!
+## Project Overview
+SR-31-Invictus is a React Native application using Expo for development and an Express.js backend with MySQL for user authentication and research paper search functionality.
 
-When you're ready to see everything that Expo provides (or if you want to use your own editor) you can **Download** your project and use it with [expo cli](https://docs.expo.dev/get-started/installation/#expo-cli)).
+## Features
+- *User Authentication*: Signup and login with JWT authentication.
+- *Research Paper Search*: Fetches academic research papers using the CORE API.
+- *Database Integration*: Uses MySQL for storing user data.
+- *Protected API Routes*: Secured with JWT authentication.
 
-All projects created in Snack are publicly available, so you can easily share the link to this project via link, or embed it on a web page with the `<>` button.
+## Tech Stack
+### Frontend
+- React Native
+- Expo
+- Axios (for API calls)
 
-If you're having problems, you can tweet to us [@expo](https://twitter.com/expo) or ask in our [forums](https://forums.expo.dev/c/expo-dev-tools/61) or [Discord](https://chat.expo.dev/).
+### Backend
+- Node.js
+- Express.js
+- MySQL
+- JWT for authentication
+- Bcrypt for password hashing
+- Axios for API integration
 
-Snack is Open Source. You can find the code on the [GitHub repo](https://github.com/expo/snack).
+## Installation & Setup
+### Prerequisites
+- Node.js (v14+ recommended)
+- MySQL database
+- Expo CLI
+
+### Setup Instructions
+1. Clone the repository:
+   sh
+   git clone https://github.com/your-repo/SR-31-Invictus.git
+   cd SR-31-Invictus
+   
+
+2. Install dependencies:
+   sh
+   npm install
+   
+
+3. Setup environment variables:
+   - Create a .env file in the root directory.
+   - Add the following:
+     env
+     JWT_SECRET=your_secret_key
+     DB_HOST=your_db_host
+     DB_USER=your_db_user
+     DB_PASSWORD=your_db_password
+     DB_NAME=your_db_name
+     CORE_API_KEY=your_core_api_key
+     
+
+4. Start the backend server:
+   sh
+   node server.js
+   
+
+5. Start the frontend:
+   sh
+   expo start
+   
+
+## API Endpoints
+### User Authentication
+- *Signup*: POST /signup
+- *Login*: POST /login
+
+### Research Papers
+- *Search Research Papers* (JWT Protected): GET /search?query=your_query
+
+## Troubleshooting
+- If node start throws an error, use npm start instead.
+- Ensure your MySQL database is running and properly configured.
+- Install missing dependencies with npm install.
+
+## License
+This project is licensed under the MIT License

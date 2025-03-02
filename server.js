@@ -97,31 +97,32 @@ const authenticateToken = (req, res, next) => {
 
 // 🔹 RESEARCH PAPER SEARCH API (No JWT Required)
 app.get("/search", async (req, res) => {
-  try {
-    const { query } = req.query;
-    if (!query) {
-      return res.status(400).json({ error: "Search query is required." });
+    try {
+      const { query } = req.query;
+      if (!query) {
+        return res.status(400).json({ error: "Search query is required." });
+      }
+  
+      const response = await axios.get("https://api.core.ac.uk/v3/search/works", {
+        headers: { Authorization: `Bearer ${CORE_API_KEY}` },
+        params: { q: query, limit: 10 },
+      });
+  
+      const formattedResults = response.data.results.map((paper) => ({
+        id: paper.id || `paper-${Math.random()}`,
+        title: paper.title?.trim() || "No title available",
+        authors: paper.authors?.map(a => a.name).join(", ") || "Unknown Author",
+        year: paper.year || paper.yearPublished || "N/A",
+        url: paper.url && typeof paper.url === "object" ? paper.url.url : "#",  // ✅ Extract only the URL string
+      }));
+  
+      res.json({ results: formattedResults });
+    } catch (error) {
+      console.error("Error fetching research papers:", error.response?.data || error.message);
+      res.status(500).json({ error: "Failed to fetch research papers" });
     }
-
-    const response = await axios.get("https://api.core.ac.uk/v3/search/works", {
-      headers: { Authorization: `Bearer ${CORE_API_KEY}` },
-      params: { q: query, limit: 10 },
-    });
-
-    const formattedResults = response.data.results.map((paper) => ({
-      id: paper.id || `paper-${Math.random()}`,
-      title: paper.title?.trim() || "No title available",
-      authors: paper.authors?.map(a => a.name) || ["Unknown Author"],
-      year:  paper.year || "N/A",  // 🔥 FIXED: Ensure correct year extraction
-      url: paper.links?.[0] || paper.links?.[0] || "#",     // 🔥 FIXED: Ensure correct URL extraction
-    }));
-
-    res.json({ results: formattedResults });
-  } catch (error) {
-    console.error("Error fetching research papers:", error.response?.data || error.message);
-    res.status(500).json({ error: "Failed to fetch research papers" });
-  }
-});
+  });
+  
 
 // 🔹 Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
