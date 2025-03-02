@@ -9,14 +9,14 @@ const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const CORE_API_KEY = "AkWegImizusCtaYpD82OXx3yKZqdVBUr";
-const JWT_SECRET = process.env.JWT_SECRET;
+const CORE_API_KEY = process.env.CORE_API_KEY;  // Ensure this is in your .env file
+const JWT_SECRET = process.env.JWT_SECRET;      // For authentication
 
 app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
-// Database connection
+// ✅ Database connection
 const db = mysql.createConnection({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
@@ -28,7 +28,7 @@ db.connect(err => {
   if (err) {
     console.error("Database connection failed:", err);
   } else {
-    console.log("Connected to MySQL Database");
+    console.log("✅ Connected to MySQL Database");
   }
 });
 
@@ -39,17 +39,21 @@ app.post("/signup", async (req, res) => {
     return res.status(400).json({ error: "Please fill in all fields" });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const sql = "INSERT INTO users (name, email, mobile, password) VALUES (?, ?, ?, ?)";
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const sql = "INSERT INTO users (name, email, mobile, password) VALUES (?, ?, ?, ?)";
 
-  db.query(sql, [name, email, mobile, hashedPassword], (err, result) => {
-    if (err) {
-      return res.status(500).json({ error: "Database error" });
-    }
+    db.query(sql, [name, email, mobile, hashedPassword], (err, result) => {
+      if (err) {
+        return res.status(500).json({ error: "Database error" });
+      }
 
-    const token = jwt.sign({ userId: result.insertId, email }, JWT_SECRET, { expiresIn: "1h" });
-    res.json({ message: "Signup successful", token });
-  });
+      const token = jwt.sign({ userId: result.insertId, email }, JWT_SECRET, { expiresIn: "1h" });
+      res.json({ message: "Signup successful", token });
+    });
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 // 🔹 USER LOGIN API
@@ -81,7 +85,7 @@ app.post("/login", (req, res) => {
 
 // 🔹 Middleware to Verify JWT Token
 const authenticateToken = (req, res, next) => {
-  const token = req.headers.authorization;
+  const token = req.headers.authorization?.split(" ")[1];
   if (!token) return res.status(403).json({ error: "Access denied" });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
@@ -91,18 +95,22 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// 🔹 PROTECTED RESEARCH PAPER SEARCH API
-app.get("/search", authenticateToken, async (req, res) => {
+// 🔹 RESEARCH PAPER SEARCH API (No JWT Required)
+app.get("/search", async (req, res) => {
   try {
     const { query } = req.query;
     if (!query) {
       return res.status(400).json({ error: "Search query is required." });
     }
 
+    console.log("CORE API KEY:", CORE_API_KEY); // Debugging API Key
+
     const response = await axios.get("https://api.core.ac.uk/v3/search/works", {
       headers: { Authorization: `Bearer ${CORE_API_KEY}` },
       params: { q: query, limit: 10 },
     });
+
+    console.log("API Response:", response.data); // Debugging Response
 
     const formattedResults = response.data.results.map((paper) => ({
       id: paper.id || `paper-${Math.random()}`,
@@ -114,10 +122,10 @@ app.get("/search", authenticateToken, async (req, res) => {
 
     res.json({ results: formattedResults });
   } catch (error) {
-    console.error("Error fetching research papers:", error.message);
+    console.error("Error fetching research papers:", error.response?.data || error.message);
     res.status(500).json({ error: "Failed to fetch research papers" });
   }
 });
 
-// Start server
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// 🔹 Start server
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
