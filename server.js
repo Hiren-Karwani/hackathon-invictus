@@ -9,7 +9,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const CORE_API_KEY = process.env.CORE_API_KEY;
+const CORE_API_KEY = "AkWegImizusCtaYpD82OXx3yKZqdVBUr";
 const JWT_SECRET = process.env.JWT_SECRET;
 
 app.use(cors());

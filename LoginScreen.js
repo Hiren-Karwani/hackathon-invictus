@@ -30,8 +30,8 @@ const LoginScreen = ({ navigation }) => {
         Alert.alert("Success", "Logged in successfully!");
         console.log("Token:", data.token);
 
-        // Navigate to ResearchPapersScreen instead of Home
-        navigation.replace("ResearchPapers");
+        // ✅ Navigate to HomePage instead of ResearchPapers
+        navigation.replace("Home");  
       } else {
         Alert.alert("Login Failed", data.error);
       }
@@ -72,7 +72,6 @@ const LoginScreen = ({ navigation }) => {
   );
 };
 
-// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
