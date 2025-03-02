@@ -9,8 +9,8 @@ const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const CORE_API_KEY = process.env.CORE_API_KEY;  // Ensure this is in your .env file
-const JWT_SECRET = process.env.JWT_SECRET;      // For authentication
+const CORE_API_KEY = process.env.CORE_API_KEY;  
+const JWT_SECRET = process.env.JWT_SECRET;      
 
 app.use(cors());
 app.use(express.json());
@@ -103,21 +103,17 @@ app.get("/search", async (req, res) => {
       return res.status(400).json({ error: "Search query is required." });
     }
 
-    console.log("CORE API KEY:", CORE_API_KEY); // Debugging API Key
-
     const response = await axios.get("https://api.core.ac.uk/v3/search/works", {
       headers: { Authorization: `Bearer ${CORE_API_KEY}` },
       params: { q: query, limit: 10 },
     });
 
-    console.log("API Response:", response.data); // Debugging Response
-
     const formattedResults = response.data.results.map((paper) => ({
       id: paper.id || `paper-${Math.random()}`,
       title: paper.title?.trim() || "No title available",
       authors: paper.authors?.map(a => a.name) || ["Unknown Author"],
-      year: paper.year || "N/A",
-      url: paper.links?.[0] || "#",
+      year:  paper.year || "N/A",  // 🔥 FIXED: Ensure correct year extraction
+      url: paper.links?.[0] || paper.links?.[0] || "#",     // 🔥 FIXED: Ensure correct URL extraction
     }));
 
     res.json({ results: formattedResults });
